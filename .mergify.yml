@@ -19,7 +19,11 @@ pull_request_rules:
     conditions:
       - author != dependabot[bot]
       - -closed
-      - check-success = test
+      - and: &CheckRuns
+          - check-success = test (3.10)
+          - check-success = test (3.11)
+          - check-success = test (3.12)
+          - check-success = test (3.13)
       - "#approved-reviews-by=0"
       - "#changes-requested-reviews-by=0"
       - "review-requested != @devs"
@@ -36,16 +40,16 @@ merge_protections:
       - "#approved-reviews-by >= 1"
 
   - name: Continuous Integration
-    if:
+    if: []
     success_conditions:
-      - check-success = test
+      - and: *CheckRuns
 
   - name: No review blocker
-    if:
+    if: []
     success_conditions:
       - "#changes-requested-reviews-by = 0"
       - "#review-threads-unresolved = 0"
       - "#review-requested = 0"
 
 merge_queue:
-  max_parallel_checks: 5
+  max_parallel_checks: 3
