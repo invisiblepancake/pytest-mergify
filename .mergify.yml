@@ -1,0 +1,51 @@
+extends: .github
+
+queue_rules:
+  - name: default
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+    merge_method: squash
+
+pull_request_rules:
+  - name: automatic merge
+    conditions:
+      - base = main
+    actions:
+      queue:
+
+  - name: request review
+    conditions:
+      - author != dependabot[bot]
+      - -closed
+      - check-success = test
+      - "#approved-reviews-by=0"
+      - "#changes-requested-reviews-by=0"
+      - "review-requested != @devs"
+    actions:
+      request_reviews:
+        teams:
+          - devs
+
+merge_protections:
+  - name: Reviews
+    if:
+      - author != dependabot[bot]
+    success_conditions:
+      - "#approved-reviews-by >= 1"
+
+  - name: Continuous Integration
+    if:
+    success_conditions:
+      - check-success = test
+
+  - name: No review blocker
+    if:
+    success_conditions:
+      - "#changes-requested-reviews-by = 0"
+      - "#review-threads-unresolved = 0"
+      - "#review-requested = 0"
+
+merge_queue:
+  max_parallel_checks: 5
